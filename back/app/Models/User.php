@@ -17,11 +17,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $fillable = ['nom', 'prenom', 'email', 'password', 'role', 'classe_id'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -44,5 +40,20 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function classe()
+    {
+        return $this->belongsTo(Classe::class);
+    }
+
+    public function cours()
+    {
+        return $this->hasMany(Cours::class, 'intervenant_id');
+    }
+
+    public function presences()
+    {
+        return $this->hasMany(Presence::class);
     }
 }

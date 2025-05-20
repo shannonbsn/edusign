@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nom');
             $table->foreignId('classe_id')->constrained('classes')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('intervenant_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignId('salle')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('salle')->constrained('salles')->onUpdate('cascade')->onDelete('cascade');
             $table->dateTime('date');
             $table->dateTime('h_debut');
             $table->dateTime('h_fin');
