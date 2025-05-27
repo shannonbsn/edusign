@@ -1,8 +1,42 @@
 <?php
 
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Models\User;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
+Route::post('/login', function (Request $request) {
+    $user = User::where('email', $request->email)->first();
+
+    if ($user && Hash::check($request->password, $user->password)) {
+        $token = $user->createToken('auth-token', ['check-status', 'place-orders'])->plainTextToken;
+
+        return response()->json([
+            'token' => $token
+        ]);
+    }
+
+    return response()->json(['error' => 'Identifiants incorrects'], 401);
+})->middleware(['auth:sanctum', 'abilities:check-status,place-orders']);
+
+Route::get('/user', function (Request $request) {
+    return response()->json($request->user());
+})->middleware('auth:sanctum');
+
+Route::post('/logout', function (Request $request) {
+    $request->user()->currentAccessToken()->delete();
+    return response()->json(['message' => 'Déconnexion réussie']);
+})->middleware('auth:sanctum');
+
+// Route::post('/tokens/create', function (Request $request) {
+//     $token = $request->user()->createToken($request->token_name);
+
+//     return ['token' => $token->plainTextToken];
+// });
+
+// modifier le chemin pour rediriger vers la bonne page de mon app native
+// Route::get('/orders', function () {})->middleware(['auth:sanctum', 'abilities:check-status,place-orders']);
