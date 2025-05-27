@@ -4,7 +4,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
+use App\Http\Controllers\Api\QrScanController;
 
+// Routes pour l'authentification et les tokens
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -31,6 +33,9 @@ Route::post('/logout', function (Request $request) {
     $request->user()->currentAccessToken()->delete();
     return response()->json(['message' => 'Déconnexion réussie']);
 })->middleware('auth:sanctum');
+
+// Routes de mes api pour les vues
+Route::middleware('auth:sanctum')->post('/scan', [QrScanController::class, 'scan']);
 
 // Route::post('/tokens/create', function (Request $request) {
 //     $token = $request->user()->createToken($request->token_name);

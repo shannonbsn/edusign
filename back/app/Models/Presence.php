@@ -8,7 +8,7 @@ class Presence extends Model
 {
     protected $table = 'presences';
 
-    protected $fillable = ['user_id', 'cours_id', 'presene'];
+    protected $fillable = ['user_id', 'cours_id', 'presence'];
 
     public function user()
     {
