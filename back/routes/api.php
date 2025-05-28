@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Crypt;
 use App\Models\User;
 use App\Http\Controllers\Api\QrScanController;
 use App\Http\Controllers\PresenceController;
@@ -52,12 +53,35 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/presences/cours/{id}', [PresenceController::class, 'coursPresences']);
 });
 
+// Route pour les qrcodes
+Route::get('/generate-temporary-token/{cours}', function ($coursId) {
+    $cours = \App\Models\Cours::findOrFail($coursId);
 
-// Route::post('/tokens/create', function (Request $request) {
-//     $token = $request->user()->createToken($request->token_name);
+    $payload = [
+        'cours_id' => $cours->id,
+        'expires_at' => now()->addSeconds(10)->timestamp,
+    ];
 
-//     return ['token' => $token->plainTextToken];
-// });
+    $token = Crypt::encrypt($payload);
 
-// modifier le chemin pour rediriger vers la bonne page de mon app native
-// Route::get('/orders', function () {})->middleware(['auth:sanctum', 'abilities:check-status,place-orders']);
+    return response()->json(['token' => $token]);
+});
+Route::post('/scan-presence/{token}', function ($token, Request $request) {
+    try {
+        $data = Crypt::decrypt($token);
+
+        if (now()->timestamp > $data['expires_at']) {
+            return response()->json(['message' => 'QR expiré'], 403);
+        }
+
+        \App\Models\Presence::create([
+            'user_id' => $request->user()->id,
+            'cours_id' => $data['cours_id'],
+            'presene' => true,
+        ]);
+
+        return response()->json(['message' => 'Présence enregistrée']);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'QR invalide'], 400);
+    }
+})->middleware('auth:sanctum');
