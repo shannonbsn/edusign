@@ -43,6 +43,16 @@ class User extends Authenticatable
         ];
     }
 
+    public function isIntervenant()
+    {
+        return $this->role === 'intervenant';
+    }
+
+    public function isEtudiant()
+    {
+        return $this->role === 'etudiant';
+    }
+
     public function classe()
     {
         return $this->belongsTo(Classe::class);
